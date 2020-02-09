@@ -53,7 +53,7 @@ def api(request):
 
     result = redirect_uri + '?' + params
 
-    return redirect(redirect_uri + "&code=" + auth_code + )
+    return redirect(result)
 
 def auth(request):
     print("auth got called\n\nstr:" + str(request))
