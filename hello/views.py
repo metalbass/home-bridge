@@ -34,8 +34,9 @@ def db(request):
 
 
 def api(request):
-    print("API got called\n\nstr:" + str(request))
+    return HttpResponse("{}")
 
+def auth(request):
     request_query_dict = query_dict_from_request(str(request))
 
     # TODO: Ask for password/login or something before giving auth_code!
@@ -55,13 +56,7 @@ def api(request):
 
     return redirect(result)
 
-def auth(request):
-    print("auth got called\n\nstr:" + str(request))
-
-    return HttpResponse("{}")
 
 def token(request):
-    print("token got called\n\nstr:" + str(request))
-
     return HttpResponse("{}")
 
