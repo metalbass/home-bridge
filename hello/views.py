@@ -20,6 +20,17 @@ def db(request):
 
 
 def api(request):
-    print("API got called\n\nstr:" + str(request) + "\n\nrepr: " + repr(request))
+    print("API got called\n\nstr:" + str(request))
 
     return HttpResponse("{}")
+
+def auth(request):
+    print("auth got called\n\nstr:" + str(request))
+
+    return HttpResponse("{}")
+
+def token(request):
+    print("token got called\n\nstr:" + str(request))
+
+    return HttpResponse("{}")
+
