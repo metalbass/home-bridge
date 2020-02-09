@@ -17,3 +17,9 @@ def db(request):
     greetings = Greeting.objects.all()
 
     return render(request, "db.html", {"greetings": greetings})
+
+
+def api(request):
+    print("API got called\n\nstr:" + str(request) + "\n\nrepr: " + repr(request))
+
+    return HttpResponse("{}")
