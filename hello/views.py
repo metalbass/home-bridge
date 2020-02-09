@@ -1,6 +1,5 @@
 import urllib.parse
 
-import mimetypes
 from django import http, shortcuts
 from .models import Greeting
 
@@ -19,7 +18,7 @@ def get_request_parameters(request: http.HttpRequest, debug: bool = False):
 # Create your views here.
 def index(request):
     # return HttpResponse('Hello from Python!')
-    return shortcuts.render(request, "index.html")
+    return shortcuts.render(request, 'index.html')
 
 
 def db(request):
@@ -28,7 +27,7 @@ def db(request):
 
     greetings = Greeting.objects.all()
 
-    return shortcuts.render(request, "db.html", {"greetings": greetings})
+    return shortcuts.render(request, 'db.html', {'greetings': greetings})
 
 
 def api(request):
@@ -52,22 +51,26 @@ def auth(request):
         }
     )
 
-    return http.HttpResponseRedirect(redirect_uri + '?' + response_parameters)
+    redirect_with_parameters = redirect_uri + '?' + response_parameters
+
+    # return http.HttpResponseRedirect(redirect_with_parameters)
+
+    return http.HttpResponse('<a href="%s">Link</a>' % redirect_with_parameters)
 
 
 def token(request):
     # TODO: make sure it's a POST request
 
     json_res = {
-        "token_type": "bearer",
-        "access_token": "123access",
-        "expires_in": 24 * 60 * 60,  # 24h in seconds
+        'token_type': 'bearer',
+        'access_token': '123access',
+        'expires_in': 24 * 60 * 60,  # 24h in seconds
     }
 
     request_parameters = get_request_parameters(request)
     grant_type = request_parameters['grant_type']
 
-    if grant_type == "authorization_code":
-        json_res["refresh_token"] = "123refresh"
+    if grant_type == 'authorization_code':
+        json_res['refresh_token'] = '123refresh'
 
-    return http.HttpResponse(str(json_res), content_type="application/json")
+    return http.HttpResponse(str(json_res), content_type='application/json')
