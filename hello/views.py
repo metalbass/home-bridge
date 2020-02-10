@@ -33,6 +33,87 @@ def api(request: http.HttpRequest):
     intent_type = request_json['inputs'][0]['intent']
 
     if intent_type == 'action.devices.SYNC':
+        json_str = \
+"""{
+  "requestId": """ + '"%s",' % request_json['requestId'] + """
+  "payload": {
+    "agentUserId": "1836.15267389",
+    "devices": [
+      {
+        "id": "123",
+        "type": "action.devices.types.OUTLET",
+        "traits": [
+          "action.devices.traits.OnOff"
+        ],
+        "name": {
+          "defaultNames": [
+            "My Outlet 1234"
+          ],
+          "name": "Night light",
+          "nicknames": [
+            "wall plug"
+          ]
+        },
+        "willReportState": false,
+        "roomHint": "kitchen",
+        "deviceInfo": {
+          "manufacturer": "lights-out-inc",
+          "model": "hs1234",
+          "hwVersion": "3.2",
+          "swVersion": "11.4"
+        },
+        "otherDeviceIds": [
+          {
+            "deviceId": "local-device-id"
+          }
+        ],
+        "customData": {
+          "fooValue": 74,
+          "barValue": true,
+          "bazValue": "foo"
+        }
+      },
+      {
+        "id": "456",
+        "type": "action.devices.types.LIGHT",
+        "traits": [
+          "action.devices.traits.OnOff",
+          "action.devices.traits.Brightness",
+          "action.devices.traits.ColorTemperature",
+          "action.devices.traits.ColorSpectrum"
+        ],
+        "name": {
+          "defaultNames": [
+            "lights out inc. bulb A19 color hyperglow"
+          ],
+          "name": "lamp1",
+          "nicknames": [
+            "reading lamp"
+          ]
+        },
+        "willReportState": false,
+        "roomHint": "office",
+        "attributes": {
+          "temperatureMinK": 2000,
+          "temperatureMaxK": 6500
+        },
+        "deviceInfo": {
+          "manufacturer": "lights out inc.",
+          "model": "hg11",
+          "hwVersion": "1.2",
+          "swVersion": "5.4"
+        },
+        "customData": {
+          "fooValue": 12,
+          "barValue": false,
+          "bazValue": "bar"
+        }
+      }
+    ]
+  }
+}"""
+        print('returning %s' % json_str)  
+        return http.HttpResponse(json_str, content_type='application/json')
         response_dict = {
             'requestId': request_json['requestId'],
             'payload': {
