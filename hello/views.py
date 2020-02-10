@@ -33,7 +33,7 @@ def api(request: http.HttpRequest):
     intent_type = request_json['inputs'][0]['intent']
 
     if intent_type == 'action.devices.SYNC':
-        response = {
+        response_dict = {
             'requestId': request_json['requestId'],
             'payload': {
                 'agentUserId': 'xavi.casa',
@@ -41,7 +41,11 @@ def api(request: http.HttpRequest):
             }
         }
 
-        return http.HttpResponse(json.dumps(response), content_type='application/json')
+        response_json = json.dumps(response_dict)
+
+        print('returning json:\n' + response_json)
+
+        return http.HttpResponse(response_json, content_type='application/json')
 
     return http.HttpResponseNotAllowed(intent_type)
 
