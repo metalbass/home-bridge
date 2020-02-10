@@ -13,10 +13,6 @@ def generate_expiration_date(expiration_time: timedelta = timedelta(hours=24)) -
     return timezone.now() + expiration_time
 
 
-class Greeting(models.Model):
-    when = models.DateTimeField("date created", auto_now_add=True)
-
-
 class SecretData(models.Model):
     @classmethod
     def load(cls):

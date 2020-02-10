@@ -5,7 +5,7 @@ from django import http, shortcuts
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 
-from .models import Greeting, AuthToken, AccessToken, RefreshToken, SecretData
+from .models import AuthToken, AccessToken, RefreshToken, SecretData
 
 
 def get_request_parameters(request: http.HttpRequest, debug: bool = False):
@@ -19,19 +19,12 @@ def get_request_parameters(request: http.HttpRequest, debug: bool = False):
     return request_query_dict
 
 
-# Create your views here.
 def index(request):
-    # return HttpResponse('Hello from Python!')
     return shortcuts.render(request, 'index.html')
 
 
-def db(request):
-    greeting = Greeting()
-    greeting.save()
 
-    greetings = Greeting.objects.all()
 
-    return shortcuts.render(request, 'db.html', {'greetings': greetings})
 
 
 @csrf_exempt

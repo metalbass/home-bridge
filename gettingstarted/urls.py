@@ -16,7 +16,6 @@ import hello.views
 
 urlpatterns = [
     path("", hello.views.index, name="index"),
-    path("db/", hello.views.db, name="db"),
     path("api/", hello.views.api),
     path("auth/", hello.views.auth),
     path("token/", hello.views.token),
