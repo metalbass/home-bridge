@@ -36,9 +36,10 @@ def db(request):
 
 @csrf_exempt
 def api(request: http.HttpRequest):
-    print(str(request))
-    print(str(get_request_parameters(request)))
-    print(str(request.POST))
+    print('api request:' + str(request))
+    print('api request params' + str(get_request_parameters(request)))
+    print('api request POST' + str(request.POST))
+    print('api request body' + str(request.body))
 
     return http.HttpResponse("{}")
 
