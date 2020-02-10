@@ -23,18 +23,27 @@ def index(request):
     return shortcuts.render(request, 'index.html')
 
 
-
-
-
-
 @csrf_exempt
 def api(request: http.HttpRequest):
-    print('api request:' + str(request))
-    print('api request params' + str(get_request_parameters(request)))
-    print('api request POST' + str(request.POST))
+    print('api request headers:' + str(request.headers))
     print('api request body' + str(request.body))
 
-    return http.HttpResponse("{}")
+    request_json = json.loads(request.body)
+
+    intent_type = request_json['inputs'][0]['intent']
+
+    if intent_type == 'action.devices.SYNC':
+        response = {
+            'requestId': request_json['requestId'],
+            'payload': {
+                'agentUserId': 'xavi.casa',
+                'devices': []
+            }
+        }
+
+        return http.HttpResponse(json.dumps(response), content_type='application/json')
+
+    return http.HttpResponseNotAllowed(intent_type)
 
 
 def auth(request: http.HttpRequest):
