@@ -40,40 +40,6 @@ def api(request: http.HttpRequest):
     "agentUserId": "1836.15267389",
     "devices": [
       {
-        "id": "123",
-        "type": "action.devices.types.OUTLET",
-        "traits": [
-          "action.devices.traits.OnOff"
-        ],
-        "name": {
-          "defaultNames": [
-            "My Outlet 1234"
-          ],
-          "name": "Night light",
-          "nicknames": [
-            "wall plug"
-          ]
-        },
-        "willReportState": false,
-        "roomHint": "kitchen",
-        "deviceInfo": {
-          "manufacturer": "lights-out-inc",
-          "model": "hs1234",
-          "hwVersion": "3.2",
-          "swVersion": "11.4"
-        },
-        "otherDeviceIds": [
-          {
-            "deviceId": "local-device-id"
-          }
-        ],
-        "customData": {
-          "fooValue": 74,
-          "barValue": true,
-          "bazValue": "foo"
-        }
-      },
-      {
         "id": "456",
         "type": "action.devices.types.LIGHT",
         "traits": [
