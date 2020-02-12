@@ -35,7 +35,7 @@ def api(request: http.HttpRequest):
     if intent_type == 'action.devices.SYNC':
         json_str = \
 """{
-  "requestId": """ + '"%s",' % request_json['requestId'] + """
+  "requestId": "%s",""" % request_json['requestId'] + """
   "payload": {
     "agentUserId": "1836.15267389",
     "devices": [
