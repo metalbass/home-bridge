@@ -6,6 +6,7 @@ from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 
 from .models import AuthToken, AccessToken, RefreshToken, SecretData
+from . import intents
 
 
 def get_request_parameters(request: http.HttpRequest, debug: bool = False):
@@ -33,66 +34,8 @@ def api(request: http.HttpRequest):
     intent_type = request_json['inputs'][0]['intent']
 
     if intent_type == 'action.devices.SYNC':
-        json_str = \
-"""{
-  "requestId": "%s",""" % request_json['requestId'] + """
-  "payload": {
-    "agentUserId": "1836.15267389",
-    "devices": [
-      {
-        "id": "456",
-        "type": "action.devices.types.LIGHT",
-        "traits": [
-          "action.devices.traits.OnOff",
-          "action.devices.traits.Brightness",
-          "action.devices.traits.ColorTemperature",
-          "action.devices.traits.ColorSpectrum"
-        ],
-        "name": {
-          "defaultNames": [
-            "lights out inc. bulb A19 color hyperglow"
-          ],
-          "name": "lamp1",
-          "nicknames": [
-            "reading lamp"
-          ]
-        },
-        "willReportState": false,
-        "roomHint": "office",
-        "attributes": {
-          "temperatureMinK": 2000,
-          "temperatureMaxK": 6500
-        },
-        "deviceInfo": {
-          "manufacturer": "lights out inc.",
-          "model": "hg11",
-          "hwVersion": "1.2",
-          "swVersion": "5.4"
-        },
-        "customData": {
-          "fooValue": 12,
-          "barValue": false,
-          "bazValue": "bar"
-        }
-      }
-    ]
-  }
-}"""
-        print('returning %s' % json_str)  
-        return http.HttpResponse(json_str, content_type='application/json')
-        response_dict = {
-            'requestId': request_json['requestId'],
-            'payload': {
-                'agentUserId': 'xavi.casa',
-                'devices': []
-            }
-        }
-
-        response_json = json.dumps(response_dict)
-
-        print('returning json:\n' + response_json)
-
-        return http.HttpResponse(response_json, content_type='application/json')
+        return http.HttpResponse(json.dumps(intents.on_sync(request_json), indent=2),
+                                 content_type='application/json')
 
     return http.HttpResponseNotAllowed(intent_type)
 
