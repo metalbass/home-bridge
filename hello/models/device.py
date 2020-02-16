@@ -1,5 +1,5 @@
 from django.db.models import Model, OneToOneField, ManyToManyField, PROTECT, TextChoices, CharField, BooleanField
-# from collectionfield.models import CollectionField
+from collectionfield.models import CollectionField
 
 
 class DeviceType(TextChoices):
@@ -15,9 +15,16 @@ class DeviceTraitEntry(Model):
 
 
 class DeviceName(Model):
-    # default_names = CollectionField(collection_type=set, item_type=str, unique=True)
+    default_names = CollectionField(collection_type=set, item_type=str, unique=True)
     name = CharField(max_length=64)
-    # nick_names = CollectionField(collection_type=set, item_type=str, unique=True)
+    nick_names = CollectionField(collection_type=set, item_type=str, unique=True)
+
+    def get_name_dict(self):
+        return {
+            'defaultNames': [name for name in self.default_names],
+            'name': self.name,
+            'nicknames': [name for name in self.nick_names]
+        }
 
 
 class Device(Model):
@@ -25,7 +32,7 @@ class Device(Model):
     type = CharField(max_length=64, choices=DeviceType.choices)
     traits = ManyToManyField(DeviceTraitEntry)
     name = OneToOneField(DeviceName, on_delete=PROTECT, null=True)
-    willReportState = BooleanField(default=False)
+    will_report_state = BooleanField(default=False)
     # attributes
     # deviceInfo
 
@@ -36,5 +43,7 @@ class Device(Model):
         return {
             'id': self.id,
             'type': self.type,
-            'traits': self.get_traits_dict()
+            'traits': self.get_traits_dict(),
+            'name': self.name.get_name_dict(),
+            'willReportState': self.will_report_state
         }

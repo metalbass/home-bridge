@@ -37,10 +37,15 @@ class SyncTest(TestCase):
 
         DeviceTraitEntry(trait=DeviceTrait.ON_OFF).save()
 
-        device = Device(id='456', type=DeviceType.LIGHT)
+        name = DeviceName(default_names=['lights out inc. bulb A19 color hyperglow'], name='lamp1',
+                          nick_names=['reading lamp'])
+        name.save()
+
+        device = Device(id='456', type=DeviceType.LIGHT, will_report_state=False)
         device.save()
 
         device.traits.add(DeviceTrait.ON_OFF)
+        device.name = name
         device.save()
 
         correct_result = {
@@ -53,16 +58,16 @@ class SyncTest(TestCase):
                     'traits': [
                         'action.devices.traits.OnOff',
                     ],
-                    # 'name': {
-                    #     'defaultNames': [
-                    #         'lights out inc. bulb A19 color hyperglow'
-                    #     ],
-                    #     'name': 'lamp1',
-                    #     'nicknames': [
-                    #         'reading lamp'
-                    #     ]
-                    # },
-                    # 'willReportState': False,
+                    'name': {
+                        'defaultNames': [
+                            'lights out inc. bulb A19 color hyperglow'
+                        ],
+                        'name': 'lamp1',
+                        'nicknames': [
+                            'reading lamp'
+                        ]
+                    },
+                    'willReportState': False,
                     # 'attributes': {
                     #     'temperatureMinK': 2000,
                     #     'temperatureMaxK': 6500
