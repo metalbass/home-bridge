@@ -1,8 +1,5 @@
 from django.contrib import admin
+from django.apps import apps
+from .models import *
 
-from .models import oauth
-
-admin.site.register(oauth.SecretData)
-admin.site.register(oauth.AuthToken)
-admin.site.register(oauth.AccessToken)
-admin.site.register(oauth.RefreshToken)
+admin.site.register(apps.get_app_config('hello').get_models())
