@@ -10,10 +10,6 @@ class DeviceTrait(TextChoices):
     ON_OFF = 'action.devices.traits.OnOff'
 
 
-class DeviceTraitEntry(Model):
-    trait = CharField(primary_key=True, max_length=64, choices=DeviceTrait.choices)
-
-
 class DeviceName(Model):
     default_names = CollectionField(collection_type=set, item_type=str, unique=True)
     name = CharField(max_length=64)
@@ -30,14 +26,14 @@ class DeviceName(Model):
 class Device(Model):
     id = CharField(primary_key=True, max_length=32)
     type = CharField(max_length=64, choices=DeviceType.choices)
-    traits = ManyToManyField(DeviceTraitEntry)
+    traits = CollectionField(collection_type=set, item_type=DeviceTrait, unique=True, choices=DeviceTrait.choices)
     name = OneToOneField(DeviceName, on_delete=PROTECT, null=True)
     will_report_state = BooleanField(default=False)
     # attributes
     # deviceInfo
 
     def get_traits_dict(self):
-        return [trait.trait for trait in self.traits.all()]
+        return [trait for trait in self.traits]
 
     def to_dict(self):
         return {

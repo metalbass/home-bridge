@@ -35,8 +35,6 @@ class SyncTest(TestCase):
             'inputs': [{'intent': 'action.devices.SYNC'}]
         }
 
-        DeviceTraitEntry(trait=DeviceTrait.ON_OFF).save()
-
         name = DeviceName(default_names=['lights out inc. bulb A19 color hyperglow'], name='lamp1',
                           nick_names=['reading lamp'])
         name.save()
