@@ -21,7 +21,6 @@ def on_sync_devices() -> array:
             ]
         },
         'willReportState': False,
-        'roomHint': 'office',
         'attributes': {
             'temperatureMinK': 2000,
             'temperatureMaxK': 6500
@@ -31,11 +30,6 @@ def on_sync_devices() -> array:
             'model': 'hg11',
             'hwVersion': '1.2',
             'swVersion': '5.4'
-        },
-        'customData': {
-            'fooValue': 12,
-            'barValue': False,
-            'bazValue': 'bar'
         }
     }
 

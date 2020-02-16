@@ -16,7 +16,5 @@ class Device(Model):
     # traits: [ 'action.devices.traits.OnOff', 'action.devices.traits.Brightness' ],
     # name
     # willReportState
-    # roomHint
     # attributes
     # deviceInfo
-    # customData
