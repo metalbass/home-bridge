@@ -1,7 +1,7 @@
 import array
 
 
-def on_sync_devices(request: dict) -> array:
+def on_sync_devices() -> array:
     device = {
         'id': '456',
         'type': 'action.devices.types.LIGHT',
@@ -49,7 +49,7 @@ def on_sync(request: dict) -> dict:
         'requestId': request['requestId'],
         'payload': {
             'agentUserId': '1836.15267389',
-            'devices': on_sync_devices(request)
+            'devices': on_sync_devices()
         }
     }
 

@@ -5,8 +5,8 @@ from django import http, shortcuts
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 
-from .models import AuthToken, AccessToken, RefreshToken, SecretData
 from . import intents
+from .models import oauth
 
 
 def get_request_parameters(request: http.HttpRequest, debug: bool = False):
@@ -50,14 +50,14 @@ def auth(request: http.HttpRequest):
     redirect_uri = request_parameters['redirect_uri']
 
     if (urllib.parse.urlparse(redirect_uri).netloc != 'oauth-redirect.googleusercontent.com'
-            or client_id != SecretData.load().client_id):
+            or client_id != oauth.SecretData.load().client_id):
         return http.HttpResponseForbidden('Forbidden!')
 
     # TODO: Ask for password/login or something before giving auth_code!
 
     state = request_parameters['state']
 
-    auth_token = AuthToken()
+    auth_token = oauth.AuthToken()
     auth_token.save()
 
     response_parameters = urllib.parse.urlencode(
@@ -84,7 +84,7 @@ def token(request: http.HttpRequest):
     client_id = request.POST['client_id']
     client_secret = request.POST['client_secret']
 
-    secret = SecretData.load()
+    secret = oauth.SecretData.load()
 
     if (secret.client_id != client_id
             or secret.client_secret != client_secret):
@@ -93,13 +93,13 @@ def token(request: http.HttpRequest):
 
     result_dict = {
         'token_type': 'bearer',
-        'expires_in': int(AccessToken.ExpirationTime.total_seconds()),
+        'expires_in': int(oauth.AccessToken.ExpirationTime.total_seconds()),
     }
 
     grant_type = request.POST['grant_type']
 
     if grant_type == 'authorization_code':
-        auth_token = AuthToken.objects.get(token=request.POST['code'])
+        auth_token = oauth.AuthToken.objects.get(token=request.POST['code'])
 
         if auth_token is None:
             print('no auth_token found')
@@ -110,22 +110,22 @@ def token(request: http.HttpRequest):
             print('token expired')
             return invalid_grant_response
 
-        access_token = AccessToken()
+        access_token = oauth.AccessToken()
         access_token.save()
-        refresh_token = RefreshToken()
+        refresh_token = oauth.RefreshToken()
         refresh_token.save()
 
         result_dict['access_token'] = access_token.token
         result_dict['refresh_token'] = refresh_token.token
 
     elif grant_type == 'refresh_token':
-        refresh_token = RefreshToken.objects.get(token=request.POST['refresh_token'])
+        refresh_token = oauth.RefreshToken.objects.get(token=request.POST['refresh_token'])
 
         if refresh_token is None:
             print('no refresh_token found')
             return invalid_grant_response
 
-        access_token = AccessToken()
+        access_token = oauth.AccessToken()
         access_token.save()
 
         result_dict['access_token'] = access_token.token

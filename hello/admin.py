@@ -1,8 +1,8 @@
 from django.contrib import admin
 
-from .models import AuthToken, AccessToken, RefreshToken, SecretData
+from .models import oauth
 
-admin.site.register(SecretData)
-admin.site.register(AuthToken)
-admin.site.register(AccessToken)
-admin.site.register(RefreshToken)
+admin.site.register(oauth.SecretData)
+admin.site.register(oauth.AuthToken)
+admin.site.register(oauth.AccessToken)
+admin.site.register(oauth.RefreshToken)
