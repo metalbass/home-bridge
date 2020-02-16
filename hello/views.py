@@ -58,7 +58,6 @@ def api(request: http.HttpRequest):
           ]
         },
         "willReportState": false,
-        "roomHint": "office",
         "attributes": {
           "temperatureMinK": 2000,
           "temperatureMaxK": 6500
