@@ -68,11 +68,6 @@ def api(request: http.HttpRequest):
           "model": "hg11",
           "hwVersion": "1.2",
           "swVersion": "5.4"
-        },
-        "customData": {
-          "fooValue": 12,
-          "barValue": false,
-          "bazValue": "bar"
         }
       }
     ]
