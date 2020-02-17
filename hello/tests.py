@@ -35,15 +35,10 @@ class SyncTest(TestCase):
             'inputs': [{'intent': 'action.devices.SYNC'}]
         }
 
-        name = DeviceName(default_names=['lights out inc. bulb A19 color hyperglow'], name='lamp1',
-                          nick_names=['reading lamp'])
-        name.save()
-
-        device = Device(id='456', type=DeviceType.LIGHT, will_report_state=False)
+        device = Device(id='456', type=Device.Type.LIGHT, will_report_state=False, name='lamp1')
         device.save()
 
-        device.traits.add(DeviceTrait.ON_OFF)
-        device.name = name
+        device.traits.add(Device.Trait.ON_OFF)
         device.save()
 
         correct_result = {
@@ -57,13 +52,7 @@ class SyncTest(TestCase):
                         'action.devices.traits.OnOff',
                     ],
                     'name': {
-                        'defaultNames': [
-                            'lights out inc. bulb A19 color hyperglow'
-                        ],
                         'name': 'lamp1',
-                        'nicknames': [
-                            'reading lamp'
-                        ]
                     },
                     'willReportState': False,
                     # 'attributes': {

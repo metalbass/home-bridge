@@ -1,45 +1,25 @@
-from django.db.models import Model, OneToOneField, ManyToManyField, PROTECT, TextChoices, CharField, BooleanField
 from collectionfield.models import CollectionField
-
-
-class DeviceType(TextChoices):
-    LIGHT = 'action.devices.types.LIGHT'
-
-
-class DeviceTrait(TextChoices):
-    ON_OFF = 'action.devices.traits.OnOff'
-
-
-class DeviceName(Model):
-    default_names = CollectionField(collection_type=set, item_type=str, unique=True)
-    name = CharField(max_length=64)
-    nick_names = CollectionField(collection_type=set, item_type=str, unique=True)
-
-    def get_name_dict(self):
-        return {
-            'defaultNames': [name for name in self.default_names],
-            'name': self.name,
-            'nicknames': [name for name in self.nick_names]
-        }
+from django.db.models import Model, TextChoices, CharField, BooleanField
 
 
 class Device(Model):
-    id = CharField(primary_key=True, max_length=32)
-    type = CharField(max_length=64, choices=DeviceType.choices)
-    traits = CollectionField(collection_type=set, item_type=DeviceTrait, choices=DeviceTrait.choices)
-    name = OneToOneField(DeviceName, on_delete=PROTECT, null=True)
-    will_report_state = BooleanField(default=False)
-    # attributes
-    # deviceInfo
+    class Type(TextChoices):
+        LIGHT = 'action.devices.types.LIGHT'
 
-    def get_traits_dict(self):
-        return [trait for trait in self.traits]
+    class Trait(TextChoices):
+        ON_OFF = 'action.devices.traits.OnOff'
+
+    id = CharField(primary_key=True, max_length=32)
+    name = CharField(max_length=64, unique=True)
+    type = CharField(max_length=64, choices=Type.choices)
+    traits = CollectionField(collection_type=set, item_type=Trait, choices=Trait.choices)
+    will_report_state = BooleanField(default=False)
 
     def to_dict(self):
         return {
             'id': self.id,
+            'name': {'name': self.name},
             'type': self.type,
-            'traits': self.get_traits_dict(),
-            'name': self.name.get_name_dict(),
+            'traits': [trait for trait in self.traits],
             'willReportState': self.will_report_state
         }
