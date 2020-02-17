@@ -26,7 +26,7 @@ class DeviceName(Model):
 class Device(Model):
     id = CharField(primary_key=True, max_length=32)
     type = CharField(max_length=64, choices=DeviceType.choices)
-    traits = CollectionField(collection_type=set, item_type=DeviceTrait, unique=True, choices=DeviceTrait.choices)
+    traits = CollectionField(collection_type=set, item_type=DeviceTrait, choices=DeviceTrait.choices)
     name = OneToOneField(DeviceName, on_delete=PROTECT, null=True)
     will_report_state = BooleanField(default=False)
     # attributes
