@@ -1,13 +1,14 @@
-from django.test import TestCase, RequestFactory
+from django.test import TestCase
 
-from .models.device import *
+from . import smarthome
+from .models.device import Device
 
 
-class DeviceTest(TestCase):
+class SmartHomeTests(TestCase):
     def setUp(self):
         self.maxDiff = None
 
-    def test_to_dict(self):
+    def test_device_sync(self):
         device = Device(id='456', type=Device.Type.LIGHT, will_report_state=False, name='lamp1')
         device.traits.add(Device.Trait.ON_OFF)
 
@@ -23,4 +24,16 @@ class DeviceTest(TestCase):
             'willReportState': False,
         }
 
-        self.assertDictEqual(device.to_dict(), result)
+        self.assertDictEqual(smarthome.device_sync(device), result)
+
+    def test_device_query(self):
+        device = Device(id='456', type=Device.Type.LIGHT, will_report_state=False, name='lamp1')
+        device.traits.add(Device.Trait.ON_OFF)
+
+        result = {
+            'status': "SUCCESS",
+            'online': True,
+            'on': True
+        }
+
+        self.assertDictEqual(smarthome.device_query_status(device), result)
