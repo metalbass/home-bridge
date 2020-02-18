@@ -9,13 +9,9 @@ from . import intents
 from .models import oauth
 
 
-def get_request_parameters(request: http.HttpRequest, debug: bool = False):
+def get_request_parameters(request: http.HttpRequest):
     query = urllib.parse.urlparse(str(request)).query
     request_query_dict = dict(urllib.parse.parse_qsl(query))
-
-    if debug:
-        for key in request_query_dict:
-            print(key + ': ' + request_query_dict[key])
 
     return request_query_dict
 
@@ -26,18 +22,18 @@ def index(request):
 
 @csrf_exempt
 def api(request: http.HttpRequest):
-    print('api request headers:' + str(request.headers))
-    print('api request body' + str(request.body))
-
     request_json = json.loads(request.body)
 
-    intent_type = request_json['inputs'][0]['intent']
+    intents_types = [intent_type['intent'] for intent_type in request_json['inputs']]
 
-    if intent_type == 'action.devices.SYNC':
-        return http.HttpResponse(json.dumps(intents.on_sync(request_json), indent=2),
-                                 content_type='application/json')
+    print('/!\\ API called with intents: %s' % ', '.join(intents_types))
 
-    return http.HttpResponseNotAllowed(intent_type)
+    for intent_type in intents_types:
+        if intent_type == 'action.devices.SYNC':
+            return http.HttpResponse(json.dumps(intents.on_sync(request_json), indent=2),
+                                     content_type='application/json')
+
+    return http.HttpResponseNotAllowed(intents_types)
 
 
 def auth(request: http.HttpRequest):
