@@ -1,3 +1,5 @@
+import json
+
 from django.test import TestCase
 
 from . import smarthome
@@ -9,15 +11,17 @@ class SmartHomeTests(TestCase):
         self.maxDiff = None
 
     def test_device_sync(self):
-        device = Device(id='456', type=Device.Type.LIGHT, will_report_state=False, name='lamp1')
-        device.traits.add(Device.Trait.ON_OFF)
+        device = Device(id='456', type=Device.Type.BLINDS, will_report_state=False, name='lamp1')
+        device.traits.add(Device.Trait.OPEN_CLOSE)
+        device.attributes = '{"openDirection": ["UP","DOWN"]}'
 
         result = {
             'id': '456',
-            'type': 'action.devices.types.LIGHT',
+            'type': Device.Type.BLINDS,
             'traits': [
-                'action.devices.traits.OnOff',
+                Device.Trait.OPEN_CLOSE,
             ],
+            'attributes': '{"openDirection": ["UP","DOWN"]}',
             'name': {
                 'name': 'lamp1',
             },

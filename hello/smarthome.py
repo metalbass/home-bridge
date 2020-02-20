@@ -56,6 +56,7 @@ def device_sync(device: Device) -> dict:
         'name': {'name': device.name},
         'type': device.type,
         'traits': [trait for trait in device.traits],
+        'attributes': device.attributes,
         'willReportState': device.will_report_state
     }
 
