@@ -73,5 +73,6 @@ def device_query_status(device):
 
 
 __trait_status_methods = {
-    Device.Trait.ON_OFF: lambda: ('on', True)
+    Device.Trait.ON_OFF: lambda: ('on', True),
+    Device.Trait.OPEN_CLOSE: lambda: ('openState', [{"openPercent": 40,"openDirection": "DOWN"}])
 }
