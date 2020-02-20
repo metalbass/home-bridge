@@ -49,6 +49,7 @@ def process_execute(request: dict) -> dict:
 def process_disconnect(request: dict) -> dict:
     return {}
 
+import json
 
 def device_sync(device: Device) -> dict:
     return {
@@ -56,7 +57,7 @@ def device_sync(device: Device) -> dict:
         'name': {'name': device.name},
         'type': device.type,
         'traits': [trait for trait in device.traits],
-        'attributes': device.attributes,
+        'attributes': json.loads(device.attributes),
         'willReportState': device.will_report_state
     }
 
