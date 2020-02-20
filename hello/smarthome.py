@@ -15,7 +15,7 @@ def process_fulfillment(request_json: dict) -> dict:
     }
 
     current_input = inputs[0]
-    return methods[current_input['intent']](current_input)
+    return methods[current_input['intent']](request_json)
 
 
 def process_sync(request: dict) -> dict:
