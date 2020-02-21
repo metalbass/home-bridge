@@ -23,21 +23,20 @@ def process_sync(request: dict) -> dict:
         'requestId': request['requestId'],
         'payload': {
             'agentUserId': '1836.15267389',
-            'devices': [device_sync(device) for device in Device.objects.all()]
+            'devices': [
+                device.get_description() for device in Device.get_all_devices()
+            ]
         }
     }
 
 
 def process_query(request: dict) -> dict:
-    devices = {}
-
-    for device in Device.objects.all():
-        devices[device.id] = device_query_status(device)
-
     return {
         'requestId': request['requestId'],
         'payload': {
-            'devices': devices
+            'devices': {
+                device.id: device.get_query_status() for device in Device.get_all_devices()
+            }
         }
     }
 
@@ -48,31 +47,3 @@ def process_execute(request: dict) -> dict:
 
 def process_disconnect(request: dict) -> dict:
     return {}
-
-import json
-
-def device_sync(device: Device) -> dict:
-    return {
-        'id': device.id,
-        'name': {'name': device.name},
-        'type': device.type,
-        'traits': [trait for trait in device.traits],
-        'attributes': json.loads(device.attributes),
-        'willReportState': device.will_report_state
-    }
-
-
-def device_query_status(device):
-    device_status = {'online': True, 'status': 'SUCCESS'}
-
-    for trait in device.traits:
-        name, status = __trait_status_methods[trait]()
-        device_status[name] = status
-
-    return device_status
-
-
-__trait_status_methods = {
-    Device.Trait.ON_OFF: lambda: ('on', True),
-    Device.Trait.OPEN_CLOSE: lambda: ('openState', [{"openPercent": 40,"openDirection": "DOWN"}])
-}
