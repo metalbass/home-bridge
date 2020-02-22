@@ -5,7 +5,7 @@ from django import http, shortcuts
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 
-from . import intents
+from . import smarthome
 from .models import oauth
 
 
@@ -22,18 +22,9 @@ def index(request):
 
 @csrf_exempt
 def api(request: http.HttpRequest):
-    request_json = json.loads(request.body)
+    response_dict = smarthome.process_fulfillment(json.loads(request.body))
 
-    intents_types = [intent_type['intent'] for intent_type in request_json['inputs']]
-
-    print('/!\\ API called with intents: %s' % ', '.join(intents_types))
-
-    for intent_type in intents_types:
-        if intent_type == 'action.devices.SYNC':
-            return http.HttpResponse(json.dumps(intents.on_sync(request_json), indent=2),
-                                     content_type='application/json')
-
-    return http.HttpResponseNotAllowed(intents_types)
+    return http.HttpResponse(json.dumps(response_dict, indent=2), content_type='application/json')
 
 
 def auth(request: http.HttpRequest):
