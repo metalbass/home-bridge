@@ -1,4 +1,4 @@
-from .models.device import Device
+from .models.devices import Device
 
 
 def process_fulfillment(request_json: dict) -> dict:

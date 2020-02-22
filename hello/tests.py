@@ -1,7 +1,7 @@
 from django.test import TestCase
 
 from . import smarthome
-from .models.device import Device, Blind, Bed
+from .models.devices import Device, Blind, Bed
 
 
 class DeviceTests(TestCase):
