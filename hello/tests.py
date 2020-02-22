@@ -154,3 +154,43 @@ class SmartHomeTests(TestCase):
         }
 
         self.assertDictEqual(smarthome.process_fulfillment(request), result)
+
+    def test_blind_execute_fulfillment(self):
+        request = {
+            "requestId": "ff36a3cc-ec34-11e6-b1a0-64510650abcf",
+            "inputs": [{
+                "intent": "action.devices.EXECUTE",
+                "payload": {
+                    "commands": [{
+                        "devices": [{"id": "123"}],
+                        "execution": [{
+                            "command": "action.devices.commands.OpenClose",
+                            "params": {
+                                "openPercent": 100
+                            }
+                        }]
+                    }]
+                }
+            }]
+        }
+
+        blind = Blind(id='123', will_report_state=False, name='blind1', open_percent=40)
+        blind.save()
+
+        result = {
+            "requestId": "ff36a3cc-ec34-11e6-b1a0-64510650abcf",
+            "payload": {
+                "commands": [
+                    {
+                        "ids": ["123"],
+                        "status": "SUCCESS",
+                        "states": {
+                            "openPercent": 100,
+                            "online": True
+                        }
+                    }
+                ]
+            }
+        }
+
+        self.assertDictEqual(smarthome.process_fulfillment(request), result)
