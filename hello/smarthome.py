@@ -1,4 +1,4 @@
-from .models.device import Device
+from .models.devices import Device
 
 
 def process_fulfillment(request_json: dict) -> dict:
@@ -24,7 +24,7 @@ def process_sync(request: dict) -> dict:
         'payload': {
             'agentUserId': '1836.15267389',
             'devices': [
-                device.get_description() for device in Device.get_all_devices()
+                device.get_description() for device in Device.objects.all()
             ]
         }
     }
@@ -35,7 +35,7 @@ def process_query(request: dict) -> dict:
         'requestId': request['requestId'],
         'payload': {
             'devices': {
-                device.id: device.get_query_status() for device in Device.get_all_devices()
+                device.id: device.get_query_status() for device in Device.objects.all()
             }
         }
     }

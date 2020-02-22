@@ -1,7 +1,7 @@
 from django.test import TestCase
 
 from . import smarthome
-from .models.device import Device, Blind, Bed
+from .models.devices import Device, Blind, Bed
 
 
 class DeviceTests(TestCase):
@@ -12,13 +12,13 @@ class DeviceTests(TestCase):
         device = Blind(id='123', will_report_state=False, name='blind1')
         device.save()
 
-        self.assertIsInstance(Device.get_all_devices()[0], Blind)
+        self.assertIsInstance(Device.objects.all()[0], Blind)
 
     def test_get_all_devices_can_call_abstract_method(self):
         device = Blind(id='123', will_report_state=False, name='blind1')
         device.save()
 
-        self.assertEqual(Device.get_all_devices()[0].get_type(), Device.Type.BLINDS)
+        self.assertEqual(Device.objects.all()[0].get_type(), Device.Type.BLINDS)
 
     def test_get_all_devices_set_of_types(self):
         device = Blind(id='123', will_report_state=False, name='blind1')
@@ -27,7 +27,7 @@ class DeviceTests(TestCase):
         device = Bed(id='456', will_report_state=False, name='bed1')
         device.save()
 
-        types = {d.get_type() for d in Device.get_all_devices()}
+        types = {d.get_type() for d in Device.objects.all()}
 
         self.assertSetEqual({Device.Type.BLINDS, Device.Type.BED}, types)
 

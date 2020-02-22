@@ -2,7 +2,7 @@
 
 import collectionfield.models.fields
 from django.db import migrations, models
-import hello.models.device
+import hello.models.devices
 import hello.models.oauth
 
 
@@ -34,7 +34,7 @@ class Migration(migrations.Migration):
                 ('id', models.CharField(max_length=32, primary_key=True, serialize=False)),
                 ('name', models.CharField(max_length=64, unique=True)),
                 ('type', models.CharField(choices=[('action.devices.types.LIGHT', 'Light')], max_length=64)),
-                ('traits', collectionfield.models.fields.CollectionField(choices=[('action.devices.traits.OnOff', 'On Off')], collection_type=set, item_type=hello.models.device.Device.Trait)),
+                ('traits', collectionfield.models.fields.CollectionField(choices=[('action.devices.traits.OnOff', 'On Off')], collection_type=set, item_type=hello.models.devices.Device.Trait)),
                 ('will_report_state', models.BooleanField(default=False)),
             ],
         ),

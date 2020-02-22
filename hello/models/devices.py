@@ -4,6 +4,23 @@ from django.db.models import Model, TextChoices, CharField, BooleanField, Intege
 
 
 class Device(Model):
+    class AbstractModelObjects:
+        def all(self):
+            result = []
+
+            for cls in self._get_subclasses():
+                result.extend(list(cls.objects.all()))
+
+            return result
+
+        def _get_subclasses(self) -> list:
+            return [
+                Blind,
+                Bed
+            ]
+
+    objects = AbstractModelObjects()
+
     class Type:
         LIGHT = 'action.devices.types.LIGHT'
         BLINDS = 'action.devices.types.BLINDS'
@@ -19,20 +36,6 @@ class Device(Model):
     id = CharField(primary_key=True, max_length=32)
     name = CharField(max_length=64, unique=True)
     will_report_state = BooleanField(default=False)
-
-    @staticmethod
-    def get_all_devices() -> list:
-        classes = [
-            Blind,
-            Bed
-        ]
-
-        result = []
-
-        for cls in classes:
-            result.extend(list(cls.objects.all()))
-
-        return result
 
     @abstractmethod
     def get_type(self) -> str:
