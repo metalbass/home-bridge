@@ -13,11 +13,20 @@ class Device(Model):
 
             return result
 
+        def filter(self, **kwargs):
+            result = []
+
+            for cls in self._get_subclasses():
+                result.extend(list(cls.objects.filter(**kwargs)))
+
+            return result
+
         def _get_subclasses(self) -> list:
             return [
                 Blind,
                 Bed
             ]
+
 
     objects = AbstractModelObjects()
 
@@ -29,6 +38,9 @@ class Device(Model):
     class Trait:
         ON_OFF = 'action.devices.traits.OnOff'
         OPEN_CLOSE = 'action.devices.traits.OpenClose'
+
+    class Command:
+        OPEN_CLOSE = 'action.devices.commands.OpenClose'
 
     class Meta:
         abstract = True
@@ -63,6 +75,10 @@ class Device(Model):
     def get_query_status(self) -> dict:
         pass
 
+    @abstractmethod
+    def execute_command(self, command: str, params):
+        pass
+
 
 class Blind(Device):
     class Direction(TextChoices):
@@ -87,6 +103,23 @@ class Blind(Device):
             'online': True,
             'openPercent': self.open_percent,
         }
+
+    def execute_command(self, command: str, params):
+        print('Blinds running %s: %s' % (command, params))
+
+        print('Open percent: %s' % self.open_percent)
+
+        if command == Device.Command.OPEN_CLOSE:
+            self.open_percent = 100 - self.open_percent
+            self.save()
+
+            print('Open percent: %s' % self.open_percent)
+
+            return {
+                'ids': [self.id],
+                'states': {'online': True, 'openPercent': self.open_percent},
+                'status': 'SUCCESS'
+            }
 
 
 class Bed(Device):

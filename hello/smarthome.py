@@ -47,12 +47,12 @@ def process_execute(request: dict) -> dict:
     for command in request['inputs'][0]['payload']['commands']:
         device_ids = [device['id'] for device in command['devices']]
 
-        devices = Device.get_devices(device_ids)
+        devices = Device.objects.filter(id__in=device_ids)
 
         for device in devices:
             for e in command['execution']:
                 # això no acaba d'estar bé perquè si s'agrupen comandes en enviar, aquí queden separades
-                result_commands.append(device.execute(e['command'], e['params']))
+                result_commands.append(device.execute_command(e['command'], e['params']))
 
     return {
         'requestId': request['requestId'],

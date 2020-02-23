@@ -39,7 +39,7 @@ class BlindTests(TestCase):
     def test_get_description(self):
         device = Blind(id='456', will_report_state=False, name='blind1')
 
-        result = {
+        expected_result = {
             'id': '456',
             'type': 'action.devices.types.BLINDS',
             'traits': [
@@ -56,7 +56,7 @@ class BlindTests(TestCase):
             'willReportState': False,
         }
 
-        self.assertDictEqual(device.get_description(), result)
+        self.assertDictEqual(device.get_description(), expected_result)
 
     def test_get_status(self):
         device = Blind(id='456', will_report_state=False, name='blind1')
@@ -81,7 +81,7 @@ class SmartHomeTests(TestCase):
             }]
         }
 
-        result = {
+        expected_result = {
             "requestId": "ff36a3cc-ec34-11e6-b1a0-64510650abcf",
             "payload": {
                 "agentUserId": "1836.15267389",
@@ -89,7 +89,7 @@ class SmartHomeTests(TestCase):
             }
         }
 
-        self.assertDictEqual(smarthome.process_fulfillment(request), result)
+        self.assertDictEqual(smarthome.process_fulfillment(request), expected_result)
 
     def test_blind_sync_fulfillment(self):
         request = {
@@ -102,7 +102,7 @@ class SmartHomeTests(TestCase):
         blind = Blind(id='456', will_report_state=False, name='blind1')
         blind.save()
 
-        result = {
+        expected_result = {
             "requestId": "ff36a3cc-ec34-11e6-b1a0-64510650abcf",
             "payload": {
                 "agentUserId": "1836.15267389",
@@ -123,7 +123,7 @@ class SmartHomeTests(TestCase):
             }
         }
 
-        self.assertDictEqual(smarthome.process_fulfillment(request), result)
+        self.assertDictEqual(smarthome.process_fulfillment(request), expected_result)
 
     def test_blind_query_fulfillment(self):
         request = {
@@ -141,7 +141,7 @@ class SmartHomeTests(TestCase):
         blind = Blind(id='456', will_report_state=False, name='blind1', open_percent=40)
         blind.save()
 
-        result = {
+        expected_result = {
             "requestId": "ff36a3cc-ec34-11e6-b1a0-64510650abcf",
             "payload": {
                 "devices": {
@@ -153,7 +153,7 @@ class SmartHomeTests(TestCase):
             }
         }
 
-        self.assertDictEqual(smarthome.process_fulfillment(request), result)
+        self.assertDictEqual(smarthome.process_fulfillment(request), expected_result)
 
     def test_blind_execute_fulfillment(self):
         request = {
@@ -174,10 +174,10 @@ class SmartHomeTests(TestCase):
             }]
         }
 
-        blind = Blind(id='123', will_report_state=False, name='blind1', open_percent=40)
+        blind = Blind(id='123', will_report_state=False, name='blind1', open_percent=0)
         blind.save()
 
-        result = {
+        expected_result = {
             "requestId": "ff36a3cc-ec34-11e6-b1a0-64510650abcf",
             "payload": {
                 "commands": [
@@ -193,4 +193,7 @@ class SmartHomeTests(TestCase):
             }
         }
 
-        self.assertDictEqual(smarthome.process_fulfillment(request), result)
+        result = smarthome.process_fulfillment(request)
+
+        self.assertDictEqual(result, expected_result)
+        self.assertEquals(Blind.objects.get(id='123').open_percent, 100)
