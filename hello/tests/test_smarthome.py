@@ -1,79 +1,49 @@
+from unittest.mock import MagicMock
+
 from django.test import TestCase
 
-from . import smarthome
-from .models.devices import Device, Blind, Bed
-
-
-class DeviceTests(TestCase):
-    def setUp(self):
-        self.maxDiff = None
-
-    def test_get_all_devices_return_blind_type(self):
-        device = Blind(id='123', will_report_state=False, name='blind1')
-        device.save()
-
-        self.assertIsInstance(Device.objects.all()[0], Blind)
-
-    def test_get_all_devices_can_call_abstract_method(self):
-        device = Blind(id='123', will_report_state=False, name='blind1')
-        device.save()
-
-        self.assertEqual(Device.objects.all()[0].get_type(), Device.Type.BLINDS)
-
-    def test_get_all_devices_set_of_types(self):
-        device = Blind(id='123', will_report_state=False, name='blind1')
-        device.save()
-
-        device = Bed(id='456', will_report_state=False, name='bed1')
-        device.save()
-
-        types = {d.get_type() for d in Device.objects.all()}
-
-        self.assertSetEqual({Device.Type.BLINDS, Device.Type.BED}, types)
-
-
-class BlindTests(TestCase):
-    def setUp(self):
-        self.maxDiff = None
-
-    def test_get_description(self):
-        device = Blind(id='456', will_report_state=False, name='blind1')
-
-        expected_result = {
-            'id': '456',
-            'type': 'action.devices.types.BLINDS',
-            'traits': [
-                'action.devices.traits.OpenClose',
-            ],
-            'attributes': {
-                'openDirection': [
-                    'UP',
-                    'DOWN'
-                ]},
-            'name': {
-                'name': 'blind1',
-            },
-            'willReportState': False,
-        }
-
-        self.assertDictEqual(device.get_description(), expected_result)
-
-    def test_get_status(self):
-        device = Blind(id='456', will_report_state=False, name='blind1')
-
-        result = {
-            'online': True,
-            'openPercent': 0
-        }
-
-        self.assertDictEqual(device.get_query_status(), result)
+from hello import smarthome
+from hello.models.devices import Blind
 
 
 class SmartHomeTests(TestCase):
     def setUp(self):
         self.maxDiff = None
+        self.smartHome = smarthome.SmartHome()
 
-    def test_empty_sync_fulfillment(self):
+    def test_process_fulfillment_sync(self):
+        mock = MagicMock(return_value={})
+        self.smartHome._fulfillment_methods['action.devices.SYNC'] = mock
+
+        self.smartHome.process_fulfillment({"inputs": [{"intent": "action.devices.SYNC"}]})
+
+        mock.assert_called_once()
+
+    def test_process_fulfillment_query(self):
+        mock = MagicMock(return_value={})
+        self.smartHome._fulfillment_methods['action.devices.QUERY'] = mock
+
+        self.smartHome.process_fulfillment({"inputs": [{"intent": "action.devices.QUERY"}]})
+
+        mock.assert_called_once()
+
+    def test_process_fulfillment_execute(self):
+        mock = MagicMock(return_value={})
+        self.smartHome._fulfillment_methods['action.devices.EXECUTE'] = mock
+
+        self.smartHome.process_fulfillment({"inputs": [{"intent": "action.devices.EXECUTE"}]})
+
+        mock.assert_called_once()
+
+    def test_process_fulfillment_disconnect(self):
+        mock = MagicMock(return_value={})
+        self.smartHome._fulfillment_methods['action.devices.DISCONNECT'] = mock
+
+        self.smartHome.process_fulfillment({"inputs": [{"intent": "action.devices.DISCONNECT"}]})
+
+        mock.assert_called_once()
+
+    def test_empty_sync(self):
         request = {
             "requestId": "ff36a3cc-ec34-11e6-b1a0-64510650abcf",
             "inputs": [{
@@ -89,9 +59,9 @@ class SmartHomeTests(TestCase):
             }
         }
 
-        self.assertDictEqual(smarthome.process_fulfillment(request), expected_result)
+        self.assertDictEqual(self.smartHome.process_sync(request), expected_result)
 
-    def test_blind_sync_fulfillment(self):
+    def test_blind_sync(self):
         request = {
             "requestId": "ff36a3cc-ec34-11e6-b1a0-64510650abcf",
             "inputs": [{
@@ -123,7 +93,7 @@ class SmartHomeTests(TestCase):
             }
         }
 
-        self.assertDictEqual(smarthome.process_fulfillment(request), expected_result)
+        self.assertDictEqual(self.smartHome.process_sync(request), expected_result)
 
     def test_blind_query_fulfillment(self):
         request = {
@@ -153,9 +123,9 @@ class SmartHomeTests(TestCase):
             }
         }
 
-        self.assertDictEqual(smarthome.process_fulfillment(request), expected_result)
+        self.assertDictEqual(self.smartHome.process_query(request), expected_result)
 
-    def test_blind_execute_fulfillment(self):
+    def test_execute_open_blind(self):
         request = {
             "requestId": "ff36a3cc-ec34-11e6-b1a0-64510650abcf",
             "inputs": [{
@@ -174,8 +144,7 @@ class SmartHomeTests(TestCase):
             }]
         }
 
-        blind = Blind(id='123', will_report_state=False, name='blind1', open_percent=0)
-        blind.save()
+        blind = Blind.objects.create(id='123', name='blind1')
 
         expected_result = {
             "requestId": "ff36a3cc-ec34-11e6-b1a0-64510650abcf",
@@ -193,7 +162,7 @@ class SmartHomeTests(TestCase):
             }
         }
 
-        result = smarthome.process_fulfillment(request)
+        result = self.smartHome.process_execute(request)
 
         self.assertDictEqual(result, expected_result)
         self.assertEquals(Blind.objects.get(id='123').open_percent, 100)

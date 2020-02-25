@@ -2,33 +2,11 @@ from abc import abstractmethod
 
 from django.db.models import Model, TextChoices, CharField, BooleanField, IntegerField
 
+from .managers import AbstractManager
+
 
 class Device(Model):
-    class AbstractModelObjects:
-        def all(self):
-            result = []
-
-            for cls in self._get_subclasses():
-                result.extend(list(cls.objects.all()))
-
-            return result
-
-        def filter(self, **kwargs):
-            result = []
-
-            for cls in self._get_subclasses():
-                result.extend(list(cls.objects.filter(**kwargs)))
-
-            return result
-
-        def _get_subclasses(self) -> list:
-            return [
-                Blind,
-                Bed
-            ]
-
-
-    objects = AbstractModelObjects()
+    objects = AbstractManager(None)
 
     class Type:
         LIGHT = 'action.devices.types.LIGHT'
@@ -40,6 +18,7 @@ class Device(Model):
         OPEN_CLOSE = 'action.devices.traits.OpenClose'
 
     class Command:
+        ON_OFF = 'action.devices.commands.OnOff'
         OPEN_CLOSE = 'action.devices.commands.OpenClose'
 
     class Meta:
@@ -51,15 +30,15 @@ class Device(Model):
 
     @abstractmethod
     def get_type(self) -> str:
-        pass
+        """ returns the type of this device as a string """
 
     @abstractmethod
     def get_traits(self) -> list:
-        pass
+        """ returns the supported traits for this device """
 
     @abstractmethod
     def get_attributes(self) -> dict:
-        pass
+        """ returns the attributes associated with the traits of this device """
 
     def get_description(self) -> dict:
         return {
@@ -73,18 +52,17 @@ class Device(Model):
 
     @abstractmethod
     def get_query_status(self) -> dict:
-        pass
+        """ returns the status of the device in the query intent format """
 
     @abstractmethod
-    def execute_command(self, command: str, params):
-        pass
+    def execute_command(self, command: str, params: dict) -> dict:
+        """ returns the status of the device in the execute intent format """
+
+
+Device.objects = AbstractManager(Device)
 
 
 class Blind(Device):
-    class Direction(TextChoices):
-        UP = 'UP',
-        DOWN = 'DOWN'
-
     open_percent = IntegerField(default=0)
 
     def get_type(self) -> str:
@@ -104,16 +82,10 @@ class Blind(Device):
             'openPercent': self.open_percent,
         }
 
-    def execute_command(self, command: str, params):
-        print('Blinds running %s: %s' % (command, params))
-
-        print('Open percent: %s' % self.open_percent)
-
+    def execute_command(self, command: str, params: dict) -> dict:
         if command == Device.Command.OPEN_CLOSE:
             self.open_percent = 100 - self.open_percent
             self.save()
-
-            print('Open percent: %s' % self.open_percent)
 
             return {
                 'ids': [self.id],
