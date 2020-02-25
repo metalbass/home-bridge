@@ -144,7 +144,7 @@ class SmartHomeTests(TestCase):
             }]
         }
 
-        blind = Blind.objects.create(id='123', name='blind1')
+        Blind.objects.create(id='123', name='blind1')
 
         expected_result = {
             "requestId": "ff36a3cc-ec34-11e6-b1a0-64510650abcf",

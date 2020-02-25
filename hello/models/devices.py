@@ -1,6 +1,6 @@
 from abc import abstractmethod
 
-from django.db.models import Model, TextChoices, CharField, BooleanField, IntegerField
+from django.db.models import Model, CharField, BooleanField, IntegerField
 
 from .managers import AbstractManager
 
@@ -106,3 +106,6 @@ class Bed(Device):
 
     def get_query_status(self) -> dict:
         return {}
+
+    def execute_command(self, command: str, params: dict) -> dict:
+        pass
