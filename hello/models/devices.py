@@ -74,10 +74,14 @@ class Blind(Device):
         ]
 
     def get_attributes(self) -> dict:
-        return {'openDirection': ['UP', 'DOWN']}
+        return {
+            'discreteOnlyOpenClose': True,
+            'openDirection': ['DOWN']
+        }
 
     def get_query_status(self) -> dict:
         return {
+
             'online': True,
             'openPercent': self.open_percent,
         }
