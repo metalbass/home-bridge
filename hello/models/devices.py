@@ -1,6 +1,6 @@
 from abc import abstractmethod
 
-from django.db.models import Model, TextChoices, CharField, BooleanField, IntegerField
+from django.db.models import Model, CharField, BooleanField, IntegerField
 
 from .managers import AbstractManager
 
@@ -74,17 +74,21 @@ class Blind(Device):
         ]
 
     def get_attributes(self) -> dict:
-        return {'openDirection': ['UP', 'DOWN']}
+        return {
+            'discreteOnlyOpenClose': True,
+            'openDirection': ['DOWN']
+        }
 
     def get_query_status(self) -> dict:
         return {
+
             'online': True,
             'openPercent': self.open_percent,
         }
 
     def execute_command(self, command: str, params: dict) -> dict:
         if command == Device.Command.OPEN_CLOSE:
-            self.open_percent = 100 - self.open_percent
+            self.open_percent = params['openPercent']
             self.save()
 
             return {
@@ -106,3 +110,6 @@ class Bed(Device):
 
     def get_query_status(self) -> dict:
         return {}
+
+    def execute_command(self, command: str, params: dict) -> dict:
+        pass
