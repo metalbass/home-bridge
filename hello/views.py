@@ -5,8 +5,10 @@ from django import http, shortcuts
 from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 
-from . import smarthome
 from .models import oauth
+from .smarthome import SmartHome
+
+smartHome = SmartHome()
 
 
 def get_request_parameters(request: http.HttpRequest):
@@ -22,7 +24,7 @@ def index(request):
 
 @csrf_exempt
 def api(request: http.HttpRequest):
-    response_dict = smarthome.process_fulfillment(json.loads(request.body))
+    response_dict = smartHome.process_fulfillment(json.loads(request.body))
 
     return http.HttpResponse(json.dumps(response_dict, indent=2), content_type='application/json')
 
