@@ -17,7 +17,11 @@ class SmartHome:
             print('/!\\ Multiple intents received!: %s' % str(inputs))
 
         current_input = inputs[0]
-        return self._fulfillment_methods[current_input['intent']](request_json)
+        response = self._fulfillment_methods[current_input['intent']](request_json)
+
+        print('REQUEST:%s\nRESPONSE:%s' % (request_json, response))
+
+        return response
 
     @staticmethod
     def process_sync(request: dict) -> dict:
