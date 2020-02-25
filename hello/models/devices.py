@@ -88,7 +88,7 @@ class Blind(Device):
 
     def execute_command(self, command: str, params: dict) -> dict:
         if command == Device.Command.OPEN_CLOSE:
-            self.open_percent = 100 - self.open_percent
+            self.open_percent = params['openPercent']
             self.save()
 
             return {
