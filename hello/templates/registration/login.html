@@ -1,0 +1,41 @@
+{% extends "base_bootstrap.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid bg-dark text-white">
+    <div class="container">
+        <h1 class="display-4 py-3">Login</h1>
+        {% if form.errors %}
+            <p class="bg-danger p-3">Your username and password didn't match. Please try again.</p>
+        {% endif %}
+        {% if next %}
+            {% if user.is_authenticated %}
+                <p class="bg-danger">Your account doesn't have access to this page. To proceed,
+                please login with an account that has access.</p>
+            {% else %}
+                <p class="bg-danger">Please login to see this page.</p>
+            {% endif %}
+        {% endif %}
+
+        <form method="post" action="{% url 'login' %}">
+            {% csrf_token %}
+
+            <div class="row py-2">
+                <div class="col-3">{{ form.username.label_tag }}</div>
+                <div class="col-9">{{ form.username }}</div>
+            </div>
+            <div class="row py-2">
+                <div class="col-3"> {{ form.password.label_tag }}</div>
+                <div class="col-9"> {{ form.password }}</div>
+            </div>
+
+            <input type="submit" class="btn" value="login">
+            <input type="hidden" name="next" value="{{ next }}">
+
+            <p class="py-3"><a href="{% url 'password_reset' %}">Lost password?</a></p>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+

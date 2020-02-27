@@ -3,6 +3,7 @@ import urllib.parse
 
 from django import http, shortcuts
 from django.utils import timezone
+from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import csrf_exempt
 
 from .models import oauth
@@ -29,6 +30,7 @@ def api(request: http.HttpRequest):
     return http.HttpResponse(json.dumps(response_dict, indent=2), content_type='application/json')
 
 
+@login_required
 def auth(request: http.HttpRequest):
     if request.method != 'GET':
         return http.HttpResponseNotAllowed('Not Allowed!')
