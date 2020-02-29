@@ -11,7 +11,9 @@
 
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 
-    <title>Hello, world!</title>
+    <title>
+        {% block title %}{% endblock %}
+    </title>
 </head>
 <body>
 {% block content %}{% endblock %}
