@@ -19,9 +19,6 @@ def get_request_parameters(request: http.HttpRequest):
     return request_query_dict
 
 
-def index(request):
-    return shortcuts.render(request, 'index.html')
-
 
 @csrf_exempt
 def api(request: http.HttpRequest):
