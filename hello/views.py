@@ -21,8 +21,11 @@ def get_request_parameters(request: HttpRequest):
 
 
 @csrf_exempt
-def api(request: HttpRequest):
-    response_dict = smartHome.process_fulfillment(json.loads(request.body))
+def api(request: HttpRequest) -> HttpResponse:
+    request_dict = json.loads(request.body)
+    response_dict = smartHome.process_fulfillment(request_dict, request.headers['Authorization'])
+
+    print('REQUEST:%s\nRESPONSE:%s' % (request_dict, response_dict))
 
     return HttpResponse(json.dumps(response_dict, indent=2), content_type='application/json')
 

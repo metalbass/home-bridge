@@ -1,48 +1,62 @@
+from django.utils import timezone
+
 from .models.devices import Device
+from .models.oauth import AccessToken
 
 
 class SmartHome:
     def __init__(self):
         self._fulfillment_methods = {
-            'action.devices.SYNC': self.process_sync,
-            'action.devices.QUERY': self.process_query,
-            'action.devices.EXECUTE': self.process_execute,
-            'action.devices.DISCONNECT': self.process_disconnect,
+            'action.devices.SYNC': SmartHome.process_sync,
+            'action.devices.QUERY': SmartHome.process_query,
+            'action.devices.EXECUTE': SmartHome.process_execute,
+            'action.devices.DISCONNECT': SmartHome.process_disconnect,
         }
 
-    def process_fulfillment(self, request_json: dict) -> dict:
-        inputs = request_json['inputs']
+    def process_fulfillment(self, request: dict, html_auth: str) -> dict:
+        return {
+            'requestId': request['requestId'],
+            'payload': self.process_fulfillment_payload(request, html_auth)
+        }
+
+    def process_fulfillment_payload(self, request: dict, html_auth: str) -> dict:
+        auth_parts = html_auth.partition(' ')
+
+        if auth_parts[0] != 'Bearer':
+            return {'errorCode': 'authFailure'}
+
+        access_token = AccessToken.objects.filter(token=auth_parts[2])
+
+        if not access_token.exists():
+            return {'errorCode': 'authFailure'}
+
+        if timezone.now() > access_token[0].expiration:
+            return {'errorCode': 'authExpired'}
+
+        inputs = request['inputs']
 
         if len(inputs) > 1:
             print('/!\\ Multiple intents received!: %s' % str(inputs))
 
         current_input = inputs[0]
-        response = self._fulfillment_methods[current_input['intent']](request_json)
-
-        print('REQUEST:%s\nRESPONSE:%s' % (request_json, response))
+        response = self._fulfillment_methods[current_input['intent']](request)
 
         return response
 
     @staticmethod
     def process_sync(request: dict) -> dict:
         return {
-            'requestId': request['requestId'],
-            'payload': {
-                'agentUserId': '1836.15267389',
-                'devices': [
-                    device.get_description() for device in Device.objects.all()
-                ]
-            }
+            'agentUserId': '1836.15267389',
+            'devices': [
+                device.get_description() for device in Device.objects.all()
+            ]
         }
 
     @staticmethod
     def process_query(request: dict) -> dict:
         return {
-            'requestId': request['requestId'],
-            'payload': {
-                'devices': {
-                    device.id: device.get_query_status() for device in Device.objects.all()
-                }
+            'devices': {
+                device.id: device.get_query_status() for device in Device.objects.all()
             }
         }
 
@@ -61,10 +75,7 @@ class SmartHome:
                     result_commands.append(device.execute_command(e['command'], e['params']))
 
         return {
-            'requestId': request['requestId'],
-            'payload': {
-                'commands': result_commands
-            }
+            'commands': result_commands
         }
 
     @staticmethod
