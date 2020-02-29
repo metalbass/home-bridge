@@ -2,9 +2,9 @@ import json
 import urllib.parse
 
 from django import shortcuts
+from django.contrib.auth.decorators import login_required
 from django.http import HttpRequest, HttpResponse, HttpResponseNotAllowed, HttpResponseForbidden, HttpResponseBadRequest
 from django.utils import timezone
-from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import csrf_exempt
 
 from .models import oauth
@@ -41,23 +41,19 @@ def auth(request: HttpRequest):
             or client_id != oauth.SecretData.load().client_id):
         return HttpResponseForbidden('Forbidden!')
 
-    # TODO: Ask for password/login or something before giving auth_code!
-
     state = request_parameters['state']
 
     auth_token = oauth.AuthToken()
     auth_token.save()
 
-    response_parameters = urllib.parse.urlencode(
-        {
-            'code': auth_token.token,
-            'state': state
-        }
-    )
+    response_parameters = urllib.parse.urlencode({
+        'code': auth_token.token,
+        'state': state
+    })
 
     redirect_with_parameters = redirect_uri + '?' + response_parameters
 
-    return HttpResponse('<a href="%s">Link</a>' % redirect_with_parameters)
+    return shortcuts.render(request, 'auth_link.html', context={'next': redirect_with_parameters})
 
 
 @csrf_exempt
