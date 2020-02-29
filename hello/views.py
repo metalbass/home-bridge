@@ -1,7 +1,8 @@
 import json
 import urllib.parse
 
-from django import http, shortcuts
+from django import shortcuts
+from django.http import HttpRequest, HttpResponse, HttpResponseNotAllowed, HttpResponseForbidden, HttpResponseBadRequest
 from django.utils import timezone
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import csrf_exempt
@@ -12,25 +13,24 @@ from .smarthome import SmartHome
 smartHome = SmartHome()
 
 
-def get_request_parameters(request: http.HttpRequest):
+def get_request_parameters(request: HttpRequest):
     query = urllib.parse.urlparse(str(request)).query
     request_query_dict = dict(urllib.parse.parse_qsl(query))
 
     return request_query_dict
 
 
-
 @csrf_exempt
-def api(request: http.HttpRequest):
+def api(request: HttpRequest):
     response_dict = smartHome.process_fulfillment(json.loads(request.body))
 
-    return http.HttpResponse(json.dumps(response_dict, indent=2), content_type='application/json')
+    return HttpResponse(json.dumps(response_dict, indent=2), content_type='application/json')
 
 
 @login_required
-def auth(request: http.HttpRequest):
+def auth(request: HttpRequest):
     if request.method != 'GET':
-        return http.HttpResponseNotAllowed('Not Allowed!')
+        return HttpResponseNotAllowed('Not Allowed!')
 
     request_parameters = get_request_parameters(request)
 
@@ -39,7 +39,7 @@ def auth(request: http.HttpRequest):
 
     if (urllib.parse.urlparse(redirect_uri).netloc != 'oauth-redirect.googleusercontent.com'
             or client_id != oauth.SecretData.load().client_id):
-        return http.HttpResponseForbidden('Forbidden!')
+        return HttpResponseForbidden('Forbidden!')
 
     # TODO: Ask for password/login or something before giving auth_code!
 
@@ -57,14 +57,12 @@ def auth(request: http.HttpRequest):
 
     redirect_with_parameters = redirect_uri + '?' + response_parameters
 
-    # return http.HttpResponseRedirect(redirect_with_parameters)
-
-    return http.HttpResponse('<a href="%s">Link</a>' % redirect_with_parameters)
+    return HttpResponse('<a href="%s">Link</a>' % redirect_with_parameters)
 
 
 @csrf_exempt
-def token(request: http.HttpRequest):
-    invalid_grant_response = http.HttpResponseBadRequest('{"error": "invalid_grant"}')
+def token(request: HttpRequest):
+    invalid_grant_response = HttpResponseBadRequest('{"error": "invalid_grant"}')
 
     if request.method != 'POST':
         return invalid_grant_response
@@ -116,4 +114,4 @@ def token(request: http.HttpRequest):
 
         result_dict['access_token'] = access_token.token
 
-    return http.HttpResponse(json.dumps(result_dict), content_type='application/json')
+    return HttpResponse(json.dumps(result_dict), content_type='application/json')
