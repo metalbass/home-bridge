@@ -2,40 +2,52 @@
 {% load static %}
 
 {% block content %}
-<div class="container-fluid bg-dark text-white">
-    <div class="container">
-        <h1 class="display-4 py-3">Login</h1>
-        {% if form.errors %}
-            <p class="bg-danger p-3">Your username and password didn't match. Please try again.</p>
-        {% endif %}
-        {% if next %}
-            {% if user.is_authenticated %}
-                <p class="bg-danger">Your account doesn't have access to this page. To proceed,
-                please login with an account that has access.</p>
-            {% else %}
-                <p class="bg-danger">Please login to see this page.</p>
+<div class="container">
+    <div class="row justify-content-center align-items-center">
+        <div class="col-lg-6 py-5">
+            <h1 class="display-4 text-center py-2">Login</h1>
+
+            {% if next %}
+            <div class="text-danger pt-3">
+                <i class="material-icons text-danger align-middle">error_outline</i>
+                {% if user.is_authenticated %}
+                Your account doesn't have access to this page. To proceed, please login with an account that has
+                access.
+                {% else %}
+                Please login to see this page.
+                {% endif %}
+            </div>
             {% endif %}
-        {% endif %}
 
-        <form method="post" action="{% url 'login' %}">
-            {% csrf_token %}
+            <form class="py-2" action="{% url 'login' %}" method="post">
+                {% csrf_token %}
+                <div class="form-group">
+                    {{ form.username.label_tag }}
+                    <input type="text" name="{{ form.username.html_name }}" autofocus autocapitalize="none"
+                           autocomplete="username" maxlength="150" required id="id_username" class="form-control">
+                </div>
+                <div class="form-group">
+                    {{ form.password.label_tag }}
+                    <input type="password" name="{{ form.password.html_name }}" autocomplete="current-password" required
+                           id="id_password" class="form-control">
 
-            <div class="row py-2">
-                <div class="col-3">{{ form.username.label_tag }}</div>
-                <div class="col-9">{{ form.username }}</div>
-            </div>
-            <div class="row py-2">
-                <div class="col-3"> {{ form.password.label_tag }}</div>
-                <div class="col-9"> {{ form.password }}</div>
-            </div>
-
-            <input type="submit" class="btn" value="login">
-            <input type="hidden" name="next" value="{{ next }}">
-
-            <p class="py-3"><a href="{% url 'password_reset' %}">Lost password?</a></p>
-        </form>
+                    {% if form.errors %}
+                    <div class="text-danger pt-3">
+                        <i class="material-icons text-danger align-middle">error_outline</i>
+                        Your username and password didn't match. Please try again.
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="form-group">
+                    <input type="submit" name="submit" class="btn btn-block btn-dark btn-md" value="login">
+                    <input type="hidden" name="next" value="{{ next }}">
+                </div>
+                <div class="form-group" id="register-link">
+                    <a href="{% url 'password_reset' %}">Lost password?</a>
+                </div>
+            </form>
+        </div>
     </div>
 </div>
+
 {% endblock %}
-
-
