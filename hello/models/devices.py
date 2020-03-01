@@ -6,7 +6,7 @@ from .managers import AbstractManager
 
 
 class Device(Model):
-    objects = AbstractManager(None)
+    objects = AbstractManager()
 
     class Type:
         LIGHT = 'action.devices.types.LIGHT'
