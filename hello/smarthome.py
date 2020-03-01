@@ -71,7 +71,7 @@ class SmartHome:
 
             for device in devices:
                 for e in command['execution']:
-                    # això no acaba d'estar bé perquè si s'agrupen comandes en enviar, aquí queden separades
+                    # warning: if grouped commands are sent, this will output them separately
                     result_commands.append(device.execute_command(e['command'], e['params']))
 
         return {
