@@ -40,8 +40,10 @@ def auth(request: HttpRequest):
     if request.method != 'GET':
         return HttpResponseNotAllowed('Not Allowed!')
 
+    parameters = get_request_parameters(request)
+
     try:
-        redirect = oauth.grant_auth_token(get_request_parameters(request))
+        redirect = oauth.grant_auth_token(parameters['redirect_uri'], parameters['client_id'], parameters['state'])
     except UnauthorizedError:
         return HttpResponseForbidden('Forbidden!')
 
