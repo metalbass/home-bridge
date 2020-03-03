@@ -1,5 +1,6 @@
 import json
 import urllib.parse
+from operator import itemgetter
 
 from django import shortcuts
 from django.contrib.auth.decorators import login_required
@@ -43,7 +44,7 @@ def auth(request: HttpRequest):
     parameters = get_request_parameters(request)
 
     try:
-        redirect = oauth.grant_auth_token(parameters['redirect_uri'], parameters['client_id'], parameters['state'])
+        redirect = oauth.grant_auth_token(*itemgetter('redirect_uri', 'client_id', 'state')(parameters))
     except UnauthorizedError:
         return HttpResponseForbidden('Forbidden!')
 
@@ -58,8 +59,13 @@ def token(request: HttpRequest):
         return invalid_grant_response
 
     try:
-        result_dict = oauth.grant_access_token(request.POST)
+        if request.POST['grant_type'] == 'authorization_code':
+            result = oauth.grant_access_token(*itemgetter('client_id', 'client_secret', 'auth_token')(request.POST))
+        else:
+            result = oauth.refresh_access_token(
+                *itemgetter('client_id', 'client_secret', 'refresh_token')(request.POST))
+
     except (UnauthorizedError, TokenExpiredError):
         return invalid_grant_response
 
-    return HttpResponse(json.dumps(result_dict), content_type='application/json')
+    return HttpResponse(json.dumps(result), content_type='application/json')

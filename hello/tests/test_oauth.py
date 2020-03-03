@@ -1,9 +1,11 @@
 from unittest.mock import Mock
+from contextlib import suppress
 
 from django.test import TestCase
+from django.utils import timezone
 
-from ..models.oauth import AuthToken
-from ..oauth import OAuth, UnauthorizedError
+from ..models.oauth import AuthToken, AccessToken, RefreshToken
+from ..oauth import OAuth, UnauthorizedError, TokenExpiredError
 
 
 class OAuthTests(TestCase):
@@ -46,9 +48,9 @@ class OAuthTests(TestCase):
 
     def test_grant_auth_token_returns_new_token(self):
         self.oauth.auth_token_manager = Mock()
-        self.oauth.auth_token_manager.create = Mock(return_value=AuthToken(token='token1234'))
+        self.oauth.auth_token_manager.create = Mock(return_value=AuthToken(token='auth1234'))
 
-        self.assertURLEqual(self.known_redirect + '?code=token1234&state=state1234',
+        self.assertURLEqual(self.known_redirect + '?code=auth1234&state=state1234',
                             self.oauth.grant_auth_token(self.known_redirect, self.known_client, 'state1234'))
 
     def test_grant_auth_token_raises_unauthorized_location(self):
@@ -58,3 +60,83 @@ class OAuthTests(TestCase):
     def test_grant_auth_token_raises_unauthorized_client(self):
         with self.assertRaises(UnauthorizedError):
             self.oauth.grant_auth_token(self.known_redirect, 'unknown_client', 'state1234')
+
+    def test_grant_access_token_raises_unauthorized_client_id(self):
+        with self.assertRaises(UnauthorizedError):
+            self.oauth.grant_access_token('unknown_client', self.valid_secret, 'auth1234')
+
+    def test_grant_access_token_raises_unauthorized_client_secret(self):
+        with self.assertRaises(UnauthorizedError):
+            self.oauth.grant_access_token(self.known_client, 'invalid_secret', 'auth1234')
+
+    def test_grant_access_token_raises_unauthorized_auth_token(self):
+        with self.assertRaises(UnauthorizedError):
+            self.oauth.grant_access_token(self.known_client, self.valid_secret, 'auth1234')
+
+    def test_grant_access_token_raises_token_expired(self):
+        AuthToken.objects.create(token='auth1234', expiration=timezone.now())
+
+        with self.assertRaises(TokenExpiredError):
+            self.oauth.grant_access_token(self.known_client, self.valid_secret, 'auth1234')
+
+    def test_grant_access_token_deletes_expired_token(self):
+        AuthToken.objects.create(token='auth1234', expiration=timezone.now())
+
+        with suppress(TokenExpiredError):
+            self.oauth.grant_access_token(self.known_client, self.valid_secret, 'auth1234')
+
+        self.assertEquals(0, AuthToken.objects.count())
+
+    def test_grant_access_token_deletes_auth_token(self):
+        AuthToken.objects.create(token='auth1234')
+
+        self.oauth.grant_access_token(self.known_client, self.valid_secret, 'auth1234')
+
+        self.assertEquals(0, AuthToken.objects.count())
+
+    def test_grant_access_token_returns_dict(self):
+        AuthToken.objects.create(token='auth1234')
+
+        self.oauth.access_token_manager = Mock()
+        self.oauth.access_token_manager.create = Mock(return_value=AccessToken(token='access1234'))
+
+        self.oauth.refresh_token_manager = Mock()
+        self.oauth.refresh_token_manager.create = Mock(return_value=RefreshToken(token='refresh1234'))
+
+        expected_result = {
+            'token_type': 'bearer',
+            'expires_in': int(AccessToken.ExpirationTime.total_seconds()),
+            'access_token': 'access1234',
+            'refresh_token': 'refresh1234'
+        }
+
+        self.assertEquals(expected_result,
+                          self.oauth.grant_access_token(self.known_client, self.valid_secret, 'auth1234'))
+
+    def test_refresh_access_token_raises_unauthorized_client_id(self):
+        with self.assertRaises(UnauthorizedError):
+            self.oauth.refresh_access_token('unknown_client', self.valid_secret, 'refresh1234')
+
+    def test_refresh_access_token_raises_unauthorized_client_secret(self):
+        with self.assertRaises(UnauthorizedError):
+            self.oauth.refresh_access_token(self.known_client, 'invalid_secret', 'refresh1234')
+
+    def test_refresh_access_token_raises_unauthorized_refresh_token(self):
+        with self.assertRaises(UnauthorizedError):
+            self.oauth.refresh_access_token(self.known_client, self.valid_secret, 'refresh1234')
+
+    def test_refresh_access_token_returns_dict(self):
+        RefreshToken.objects.create(token='refresh1234')
+
+        self.oauth.access_token_manager = Mock()
+        self.oauth.access_token_manager.create = Mock(return_value=AccessToken(token='access1234'))
+
+        expected_result = {
+            'token_type': 'bearer',
+            'expires_in': int(AccessToken.ExpirationTime.total_seconds()),
+            'access_token': 'access1234',
+        }
+
+        self.assertEquals(expected_result,
+                          self.oauth.refresh_access_token(self.known_client, self.valid_secret, 'refresh1234'))
+

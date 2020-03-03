@@ -36,6 +36,8 @@ class OAuth:
         return found_secret and found_secret == client_secret
 
     def grant_auth_token(self, redirect, client_id, state) -> str:
+        # Should tokens be related to users?
+
         if not self.is_redirect_accepted(redirect):
             raise UnauthorizedError('redirect location not allowed ' + redirect)
 
@@ -51,40 +53,39 @@ class OAuth:
 
         return redirect + '?' + response_parameters
 
-    def grant_access_token(self, parameters: dict):
-        if not self.is_client_secret_accepted(parameters['client_id'], parameters['client_secret']):
-            raise UnauthorizedError
+    def grant_access_token(self, client_id, client_secret, auth_token):
+        if not self.is_client_secret_accepted(client_id, client_secret):
+            raise UnauthorizedError('client not allowed %s %s' % (client_id, client_secret))
 
-        result_dict = {
+        db_auth_token = self.auth_token_manager.filter(token=auth_token)
+
+        if not db_auth_token.exists():
+            raise UnauthorizedError('auth token does not exist ' + auth_token)
+
+        did_token_expire = timezone.now() >= db_auth_token[0].expiration
+        db_auth_token.delete()
+
+        if did_token_expire:
+            raise TokenExpiredError
+
+        return {
             'token_type': 'bearer',
             'expires_in': int(AccessToken.ExpirationTime.total_seconds()),
+            'access_token': self.access_token_manager.create().token,
+            'refresh_token': self.refresh_token_manager.create().token
         }
 
-        grant_type = parameters['grant_type']
+    def refresh_access_token(self, client_id, client_secret, refresh_token):
+        if not self.is_client_secret_accepted(client_id, client_secret):
+            raise UnauthorizedError('client not allowed %s %s' % (client_id, client_secret))
 
-        if grant_type == 'authorization_code':
-            auth_token = self.auth_token_manager.get(token=parameters['code'])
+        db_token = self.refresh_token_manager.filter(token=refresh_token)
 
-            if auth_token is None:
-                raise UnauthorizedError
+        if not db_token.exists():
+            raise UnauthorizedError('refresh token does not exist ' + refresh_token)
 
-            if timezone.now() > auth_token.expiration:
-                raise TokenExpiredError
-
-            access_token = self.access_token_manager.create()
-            refresh_token = self.refresh_token_manager.create()
-
-            result_dict['access_token'] = access_token.token
-            result_dict['refresh_token'] = refresh_token.token
-
-        elif grant_type == 'refresh_token':
-            refresh_token = RefreshToken.objects.filter(token=parameters['refresh_token'])
-
-            if not refresh_token.exists():
-                raise UnauthorizedError
-
-            access_token = self.access_token_manager.create()
-
-            result_dict['access_token'] = access_token.token
-
-        return result_dict
+        return {
+            'token_type': 'bearer',
+            'expires_in': int(AccessToken.ExpirationTime.total_seconds()),
+            'access_token': self.access_token_manager.create().token
+        }
