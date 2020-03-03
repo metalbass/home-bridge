@@ -1,5 +1,5 @@
 class AbstractManager:
-    def __init__(self, cls: type):
+    def __init__(self, cls: type = None):
         self.cls = cls
 
     def all(self):
