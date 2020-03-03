@@ -30,7 +30,7 @@ class SmartHome:
         if not access_token.exists():
             return {'errorCode': 'authFailure'}
 
-        if timezone.now() > access_token[0].expiration:
+        if timezone.now() >= access_token[0].expiration:
             return {'errorCode': 'authExpired'}
 
         inputs = request['inputs']
