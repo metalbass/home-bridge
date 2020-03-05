@@ -1,19 +1,26 @@
-from django.contrib.auth.models import AnonymousUser, User
 from django.test import TestCase, RequestFactory
 
-from .views import index
+from .models.device import *
 
 
-class SimpleTest(TestCase):
+class DeviceTest(TestCase):
     def setUp(self):
-        # Every test needs access to the request factory.
-        self.factory = RequestFactory()
+        self.maxDiff = None
 
-    def test_details(self):
-        # Create an instance of a GET request.
-        request = self.factory.get("/")
-        request.user = AnonymousUser()
+    def test_to_dict(self):
+        device = Device(id='456', type=Device.Type.LIGHT, will_report_state=False, name='lamp1')
+        device.traits.add(Device.Trait.ON_OFF)
 
-        # Test my_view() as if it were deployed at /customer/details
-        response = index(request)
-        self.assertEqual(response.status_code, 200)
+        result = {
+            'id': '456',
+            'type': 'action.devices.types.LIGHT',
+            'traits': [
+                'action.devices.traits.OnOff',
+            ],
+            'name': {
+                'name': 'lamp1',
+            },
+            'willReportState': False,
+        }
+
+        self.assertDictEqual(device.to_dict(), result)
