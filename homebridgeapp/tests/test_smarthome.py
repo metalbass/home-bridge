@@ -3,9 +3,9 @@ from unittest.mock import MagicMock
 from django.utils import timezone
 from django.test import TestCase
 
-from hello import smarthome
-from hello.models.devices import Blind
-from hello.models.oauth import AccessToken
+from homebridgeapp import smarthome
+from homebridgeapp.models.devices import Blind
+from homebridgeapp.models.oauth import AccessToken
 
 
 class SmartHomeTests(TestCase):
