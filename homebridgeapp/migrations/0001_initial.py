@@ -2,8 +2,8 @@
 
 import collectionfield.models.fields
 from django.db import migrations, models
-import hello.models.devices
-import hello.models.oauth
+import homebridgeapp.models.devices
+import homebridgeapp.models.oauth
 
 
 class Migration(migrations.Migration):
@@ -17,15 +17,15 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='AccessToken',
             fields=[
-                ('token', models.CharField(default=hello.models.oauth.generate_hex_token, max_length=32, primary_key=True, serialize=False)),
-                ('expiration', models.DateTimeField(default=hello.models.oauth.generate_expiration_date)),
+                ('token', models.CharField(default=homebridgeapp.models.oauth.generate_hex_token, max_length=32, primary_key=True, serialize=False)),
+                ('expiration', models.DateTimeField(default=homebridgeapp.models.oauth.generate_expiration_date)),
             ],
         ),
         migrations.CreateModel(
             name='AuthToken',
             fields=[
-                ('token', models.CharField(default=hello.models.oauth.generate_hex_token, max_length=32, primary_key=True, serialize=False)),
-                ('expiration', models.DateTimeField(default=hello.models.oauth.generate_expiration_date)),
+                ('token', models.CharField(default=homebridgeapp.models.oauth.generate_hex_token, max_length=32, primary_key=True, serialize=False)),
+                ('expiration', models.DateTimeField(default=homebridgeapp.models.oauth.generate_expiration_date)),
             ],
         ),
         migrations.CreateModel(
@@ -34,14 +34,14 @@ class Migration(migrations.Migration):
                 ('id', models.CharField(max_length=32, primary_key=True, serialize=False)),
                 ('name', models.CharField(max_length=64, unique=True)),
                 ('type', models.CharField(choices=[('action.devices.types.LIGHT', 'Light')], max_length=64)),
-                ('traits', collectionfield.models.fields.CollectionField(choices=[('action.devices.traits.OnOff', 'On Off')], collection_type=set, item_type=hello.models.devices.Device.Trait)),
+                ('traits', collectionfield.models.fields.CollectionField(choices=[('action.devices.traits.OnOff', 'On Off')], collection_type=set, item_type=homebridgeapp.models.devices.Device.Trait)),
                 ('will_report_state', models.BooleanField(default=False)),
             ],
         ),
         migrations.CreateModel(
             name='RefreshToken',
             fields=[
-                ('token', models.CharField(default=hello.models.oauth.generate_hex_token, max_length=32, primary_key=True, serialize=False)),
+                ('token', models.CharField(default=homebridgeapp.models.oauth.generate_hex_token, max_length=32, primary_key=True, serialize=False)),
             ],
         ),
         migrations.CreateModel(
