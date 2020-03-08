@@ -97,8 +97,7 @@ class SmartHomeTests(TestCase):
             }]
         }
 
-        blind = Blind(id='456', will_report_state=False, name='blind1')
-        blind.save()
+        Blind.objects.create(id='456', will_report_state=False, name='blind1')
 
         expected_result = {
             'agentUserId': '1836.15267389',
@@ -133,8 +132,7 @@ class SmartHomeTests(TestCase):
             }]
         }
 
-        blind = Blind(id='456', will_report_state=False, name='blind1', open_percent=40)
-        blind.save()
+        Blind.objects.create(id='456', will_report_state=False, name='blind1', open_percent=40)
 
         expected_result = {
             'devices': {
