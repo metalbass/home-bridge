@@ -1,22 +1,17 @@
 import json
 import urllib.parse
-from operator import itemgetter
 
-from django import shortcuts
+import django.apps.registry
+import django.shortcuts
+import django.http
+
 from django.contrib.auth.decorators import login_required
-from django.http import HttpRequest, HttpResponse, HttpResponseForbidden, HttpResponseBadRequest, HttpResponseNotAllowed
 from django.views.decorators.csrf import csrf_exempt
+from django.http import HttpRequest, HttpResponse, HttpResponseForbidden, HttpResponseBadRequest, HttpResponseNotAllowed
 
-from .models.oauth import SecretData
-from .oauth import OAuth, UnauthorizedError, TokenExpiredError
-from .smarthome import SmartHome
+from . import oauth
 
-secret = SecretData.load()
-
-oauth = OAuth(accepted_redirect_locations={'oauth-redirect.googleusercontent.com'},
-              accepted_clients={secret.client_id: secret.client_secret})
-
-smartHome = SmartHome()
+app = django.apps.registry.apps.get_app_config('homebridgeapp')
 
 
 def get_request_parameters(request: HttpRequest):
@@ -29,7 +24,7 @@ def get_request_parameters(request: HttpRequest):
 @csrf_exempt
 def api(request: HttpRequest) -> HttpResponse:
     request_dict = json.loads(request.body)
-    response_dict = smartHome.process_fulfillment(request_dict, request.headers['Authorization'])
+    response_dict = app.smart_home.process_fulfillment(request_dict, request.headers['Authorization'])
 
     print('REQUEST:%s\nRESPONSE:%s' % (request_dict, response_dict))
 
@@ -44,11 +39,12 @@ def auth(request: HttpRequest):
     parameters = get_request_parameters(request)
 
     try:
-        redirect = oauth.grant_auth_token(*itemgetter('redirect_uri', 'client_id', 'state')(parameters))
-    except UnauthorizedError:
+        redirect = app.oauth.grant_auth_token(parameters['redirect_uri'], parameters['client_id'],
+                                              parameters['state'])
+    except oauth.UnauthorizedError:
         return HttpResponseForbidden('Forbidden!')
 
-    return shortcuts.render(request, 'auth_link.html', context={'next': redirect})
+    return django.shortcuts.render(request, 'auth_link.html', context={'next': redirect})
 
 
 @csrf_exempt
@@ -60,12 +56,13 @@ def token(request: HttpRequest):
 
     try:
         if request.POST['grant_type'] == 'authorization_code':
-            result = oauth.grant_access_token(*itemgetter('client_id', 'client_secret', 'auth_token')(request.POST))
+            result = app.oauth.grant_access_token(request.POST['client_id'], request.POST['client_secret'],
+                                                  request.POST['auth_token'])
         else:
-            result = oauth.refresh_access_token(
-                *itemgetter('client_id', 'client_secret', 'refresh_token')(request.POST))
+            result = app.oauth.refresh_access_token(request.POST['client_id'], request.POST['client_secret'],
+                                                    request.POST['refresh_token'])
 
-    except (UnauthorizedError, TokenExpiredError):
+    except (oauth.UnauthorizedError, oauth.TokenExpiredError):
         return invalid_grant_response
 
     return HttpResponse(json.dumps(result), content_type='application/json')
