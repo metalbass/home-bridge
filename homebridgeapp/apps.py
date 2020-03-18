@@ -24,7 +24,7 @@ class HomeBridgeAppConfig(AppConfig):
             secret = SecretData.load()
             return {secret.client_id: secret.client_secret}
 
-        except django.db.utils.OperationalError as e:
+        except BaseException as e:
             print('Initializing with dummy client_id & client_secret, as ' + str(e))
             return {'': ''}
 
