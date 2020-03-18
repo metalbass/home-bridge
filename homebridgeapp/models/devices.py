@@ -80,7 +80,6 @@ class Blind(Device):
 
     def get_query_status(self) -> dict:
         return {
-
             'online': True,
             'openPercent': self.open_percent,
         }
